@@ -1,0 +1,78 @@
+---
+- hosts: centos7_init
+  user: root
+  vars:
+    ssh_user: admin
+    ssh_user_password: admin
+    sshd_port: 10022
+  tasks:
+  - name: Add a new user
+    user:
+     name="{{ ssh_user }}"
+     groups=wheel
+     password="{{ ssh_user_password }}"
+     generate_ssh_key=yes
+     ssh_key_bits=2048
+
+  - name: mkdir .ssh          #.sshフォルダの作成
+    file: dest=/home/{{ ssh_user}}/.ssh/ state=directory owner={{ ssh_user}} group={{ ssh_user}} mode=700
+
+  - name: SSH公開鍵を登録
+    authorized_key:
+      user: "{{ ssh_user }}"
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+  - name: Allow wheel group to use sudo
+    lineinfile:
+     dest: /etc/sudoers
+     state: present
+     insertafter: "^# %wheel\\s+ALL=\\(ALL\\)\\s+NOPASSWD:\\s+ALL"
+     line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+     validate: "visudo -cf %s"
+     backup: yes
+
+  - name: Forbid root to access via ssh
+    lineinfile:
+     dest: /etc/ssh/sshd_config
+     state: present
+     regexp: "^PermitRootLogin without-password"
+     line: "PermitRootLogin no"
+     backrefs: yes
+     validate: "sshd -T -f %s"
+     backup: yes
+
+  - name: Permit only specific user to access via ssh
+    lineinfile:
+     dest: /etc/ssh/sshd_config
+     state: present
+     insertafter: "^PasswordAuthentication no"
+     regexp: "^AllowUsers"
+     line: "AllowUsers {{ ssh_user }}"
+     validate: "sshd -T -f %s"
+     backup: yes
+
+  - name: "待受ポートを {{ sshd_port }} に変更"
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: "^Port"
+      insertafter: "^#Port"
+      line: "Port {{ sshd_port }}"
+
+  - name: "firewalld ポート {{ sshd_port }}/tcp のオープン"
+    firewalld:
+      port: "{{ sshd_port }}/tcp"
+      permanent: true
+      state: enabled
+      immediate: true
+
+  - name: "firewalld ポート 22/tcp のクローズ"
+    firewalld:
+      port: 22/tcp
+      permanent: true
+      state: disabled
+      immediate: true
+
+  - name: 再起動
+    service:
+      name: sshd
+      state: restarted
