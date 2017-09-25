@@ -1,2 +1,5 @@
 [centos7_init]
 160.xxx.xxx.xxx ansible_ssh_user=root
+
+[webservers]
+160.xxx.xxx.xxx ansible_ssh_user=admin
