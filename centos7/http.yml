@@ -1,10 +1,16 @@
 - hosts: centos7
+  sudo: yes
+  vars_files:
+      - vars.yml
   tasks:
     - name: apache（httpd）のインストール
       yum: name=httpd state=latest
 
     - name: firewalld で HTTP を許可
       firewalld: permanent=True service=http state=enabled immediate=true
+
+    - name: "{{ HTTPD.DOCUMENT_ROOT_DIRECTORY }} の権限設定"
+      file: path={{ HTTPD.DOCUMENT_ROOT_DIRECTORY }} owner=apache group=apache mode=0755
 
     - name: サービスの起動
       service: name=httpd state=started enabled=yes

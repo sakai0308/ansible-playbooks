@@ -1,4 +1,5 @@
 - hosts: centos7
+  sudo: yes
   tasks:
     - name: be sure ftp in installed
       yum: name=vsftpd state=installed
