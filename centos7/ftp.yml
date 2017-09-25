@@ -1,0 +1,13 @@
+- hosts: centos7
+  tasks:
+    - name: be sure ftp in installed
+      yum: name=vsftpd state=installed
+
+    - name: be sure ftp is running and enabled
+      service: name=vsftpd state=running enabled=yes
+
+    - name: ftpサービスをpublicゾーンに追加
+      command: firewall-cmd --permanent --zone=public --add-service=ftp
+
+    - name: firewall設定有効化
+      command: firewall-cmd --reload

@@ -1,0 +1,20 @@
+- hosts: centos7
+  vars_files:
+      - vars.yml
+  tasks:
+    - name: Get wp-cli
+      get_url:
+        url: "{{ WORDPRESS.CLI.PHAR_URL }}"
+        dest: "{{ GET_URL_TEMP_DIRECTORY }}/{{ WORDPRESS.CLI.PHAR_NAME }}"
+        mode: 0755
+
+    - name: Move wp-cli
+      shell: "mv {{ GET_URL_TEMP_DIRECTORY }}/{{ WORDPRESS.CLI.PHAR_NAME }} /usr/local/bin/{{ WORDPRESS.CLI.COMMAND_NAME }}"
+
+    - name: Create Symlink
+      file: 
+        src: /usr/local/bin/{{ WORDPRESS.CLI.COMMAND_NAME }}
+        dest: /usr/bin/{{ WORDPRESS.CLI.COMMAND_NAME }}
+        owner: root 
+        group: root
+        state: link

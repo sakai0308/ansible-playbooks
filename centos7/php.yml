@@ -1,0 +1,17 @@
+- hosts: centos7
+  tasks:
+    - name: PHP のインストール
+      yum: name="{{item}}" state=latest
+      with_items:
+        - php
+        - php-mysql
+
+    - name: タイムゾーンの設定
+      ini_file: >
+        dest=/etc/php.ini
+        section=Date
+        option=date.timezone
+        value='"Asia/Tokyo"'
+
+    - name: http サービスの再起動
+      service: name=httpd state=restarted enabled=yes

@@ -1,0 +1,14 @@
+- hosts: centos7
+  tasks:
+    - name: mariadb（mysql）のインストール
+      yum: name="{{item}}" state=latest
+      with_items:
+        - mariadb
+        - mariadb-server
+        - MySQL-python
+
+    - name: mariadb サービスの起動
+      service: name=mariadb state=started enabled=yes
+
+    - name: firewalld で mariadb(mysql) を許可
+      firewalld: permanent=True service=mysql state=enabled immediate=true

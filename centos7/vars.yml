@@ -1,0 +1,16 @@
+INIT:
+  ssh_user: user
+  ssh_user_password: user
+  sshd_port: 10022
+
+GET_URL_TEMP_DIRECTORY: /tmp
+
+HTTPD:
+  DOCUMENT_ROOT_DIRECTORY: /var/www/html
+
+WORDPRESS:
+  CLI:
+    PHAR_URL: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    PHAR_NAME: wp_cli
+    COMMAND_NAME: wp
+    SSH_DIRECTORY_NAME: .wp-cli
